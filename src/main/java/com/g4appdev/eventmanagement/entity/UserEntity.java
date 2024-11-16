@@ -1,6 +1,13 @@
+// src/main/java/com/g4appdev/eventmanagement/entity/UserEntity.java
+
 package com.g4appdev.eventmanagement.entity;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.util.Collections;
+import java.util.Collection;
 
 @Entity
 @Table(name = "tbluser")
@@ -83,5 +90,10 @@ public class UserEntity {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    // Convert the role to a Collection of GrantedAuthority
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority(role));
     }
 }
