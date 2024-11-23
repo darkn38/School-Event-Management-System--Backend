@@ -56,6 +56,9 @@ public class JwtUtil {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
+        } catch (ExpiredJwtException e) {
+            System.out.println("Token has expired: " + e.getMessage());
+            throw e;
         } catch (JwtException e) {
             System.out.println("Error parsing JWT: " + e.getMessage());
             throw e;
@@ -103,7 +106,16 @@ public class JwtUtil {
         try {
             final String username = extractUsername(token);
             System.out.println("Extracted username from token: " + username);
-            return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+            boolean isValid = (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+            if (isValid) {
+                System.out.println("Token is valid for user: " + username);
+            } else {
+                System.out.println("Token is invalid or expired for user: " + username);
+            }
+            return isValid;
+        } catch (ExpiredJwtException e) {
+            System.out.println("Token validation failed - Token has expired: " + e.getMessage());
+            return false;
         } catch (Exception e) {
             System.out.println("Token validation failed: " + e.getMessage());
             return false;
@@ -115,7 +127,10 @@ public class JwtUtil {
             Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
             System.out.println("Token is valid.");
             return true;
-        } catch (ExpiredJwtException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e) {
+        } catch (ExpiredJwtException e) {
+            System.out.println("Token validation error - Token has expired: " + e.getMessage());
+            return false;
+        } catch (MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e) {
             System.out.println("Token validation error: " + e.getMessage());
             return false;
         }

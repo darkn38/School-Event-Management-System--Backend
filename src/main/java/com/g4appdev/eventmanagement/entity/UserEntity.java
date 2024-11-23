@@ -5,6 +5,7 @@ package com.g4appdev.eventmanagement.entity;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import java.util.List;
 
 import java.util.Collections;
 import java.util.Collection;
@@ -30,7 +31,10 @@ public class UserEntity {
     private String role; // Role can be "student", "admin", etc.
 
     @Column(name = "password", nullable = false)
-    private String password; 
+    private String password;
+    
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
+    private List<EventRegistrationEntity> eventRegistration;
 
     // Constructors
     public UserEntity() {}

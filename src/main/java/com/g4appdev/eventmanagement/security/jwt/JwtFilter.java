@@ -31,7 +31,7 @@ public class JwtFilter extends OncePerRequestFilter {
         final String requestPath = request.getServletPath();
 
         // Skip JWT validation for login and registration endpoints
-        if (requestPath.equals("/api/auth/login") || requestPath.equals("/api/auth/register")) {
+        if (requestPath.equals("/api/auth/login") || requestPath.equals("/api/users/register")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -47,6 +47,8 @@ public class JwtFilter extends OncePerRequestFilter {
             } catch (Exception e) {
                 System.out.println("Invalid token or error while extracting username: " + e.getMessage());
             }
+        } else {
+            System.out.println("Authorization header is missing or does not contain Bearer token");
         }
 
         if (emailAddress != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -58,6 +60,15 @@ public class JwtFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                System.out.println("Token is valid, authentication set for user: " + emailAddress);
+            } else {
+                System.out.println("Token validation failed for user: " + emailAddress);
+            }
+        } else {
+            if (emailAddress == null) {
+                System.out.println("No email address extracted from token.");
+            } else {
+                System.out.println("Security context already contains authentication.");
             }
         }
 
