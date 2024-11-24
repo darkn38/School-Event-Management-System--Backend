@@ -1,6 +1,7 @@
 package com.g4appdev.eventmanagement.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +14,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.g4appdev.eventmanagement.dto.EventRegistrationDTO;
 import com.g4appdev.eventmanagement.entity.EventEntity;
 import com.g4appdev.eventmanagement.entity.EventRegistrationEntity;
 import com.g4appdev.eventmanagement.entity.UserEntity;
 import com.g4appdev.eventmanagement.service.EventRegistrationService;
+import com.g4appdev.eventmanagement.service.UserService;
+import com.g4appdev.eventmanagement.service.EventService;
+
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000") // Allow CORS for this controller
@@ -26,14 +31,26 @@ public class EventRegistrationController {
     @Autowired
     private EventRegistrationService eventRegistrationService;
 
+    @Autowired
+    private EventService eventService;
+
+    @Autowired
+    private UserService userService;
+
     // Create or Update EventRegistration
     @PostMapping
-    public ResponseEntity<EventRegistrationEntity> saveEventRegistration(@RequestBody EventRegistrationEntity registration) {
+    public ResponseEntity<EventRegistrationEntity> saveEventRegistration(@RequestBody EventRegistrationDTO registrationDTO) {
         try {
-            EventRegistrationEntity savedRegistration = eventRegistrationService.saveEventRegistration(registration);
+            // Save registration using the DTO
+            EventRegistrationEntity savedRegistration = eventRegistrationService.saveEventRegistration(registrationDTO);
             return ResponseEntity.ok(savedRegistration);
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
+            // Log the exception message and return a bad request response
+            e.printStackTrace(); // For debugging purposes
             return ResponseEntity.badRequest().body(null);
+        } catch (Exception e) {
+            e.printStackTrace(); // Log the exception for debugging purposes
+            return ResponseEntity.status(500).body(null); // Return internal server error for any other exceptions
         }
     }
 
@@ -66,27 +83,25 @@ public class EventRegistrationController {
     // Get Registrations by User
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<EventRegistrationEntity>> getRegistrationsByUser(@PathVariable int userId) {
-        try {
-            UserEntity user = new UserEntity();
-            user.setUserID(userId);
-            List<EventRegistrationEntity> registrations = eventRegistrationService.getRegistrationsByUser(user);
-            return ResponseEntity.ok(registrations);
-        } catch (RuntimeException e) {
+        Optional<UserEntity> userOptional = userService.getUserById(userId);
+        if (userOptional.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+        UserEntity user = userOptional.get();
+        List<EventRegistrationEntity> registrations = eventRegistrationService.getRegistrationsByUser(user);
+        return ResponseEntity.ok(registrations);
     }
 
     // Get Registrations by Event
     @GetMapping("/event/{eventId}")
     public ResponseEntity<List<EventRegistrationEntity>> getRegistrationsByEvent(@PathVariable int eventId) {
-        try {
-            EventEntity event = new EventEntity();
-            event.setevent_id(eventId);
-            List<EventRegistrationEntity> registrations = eventRegistrationService.getRegistrationsByEvent(event);
-            return ResponseEntity.ok(registrations);
-        } catch (RuntimeException e) {
+        Optional<EventEntity> eventOptional = eventService.getEventById(eventId);
+        if (eventOptional.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+        EventEntity event = eventOptional.get();
+        List<EventRegistrationEntity> registrations = eventRegistrationService.getRegistrationsByEvent(event);
+        return ResponseEntity.ok(registrations);
     }
 
     // Get Registrations by User and Event

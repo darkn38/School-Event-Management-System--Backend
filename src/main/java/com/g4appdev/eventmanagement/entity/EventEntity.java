@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "tblevent")
+@Table(name = "event_entity")
 public class EventEntity {
 
     @Id

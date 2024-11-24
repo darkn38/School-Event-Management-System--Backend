@@ -27,7 +27,7 @@ public class EventRegistrationEntity {
 	private UserEntity user;
 	
 	@ManyToOne
-	@JoinColumn(name="eventID", nullable = false )
+	@JoinColumn(name="eventid", nullable = false )
 	private EventEntity event;
 	
 	@Temporal(TemporalType.DATE)

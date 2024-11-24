@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EventService {
@@ -17,8 +18,9 @@ public class EventService {
         return eventRepository.findAll();
     }
 
-    public EventEntity getEventById(int id) {
-        return eventRepository.findById(id).orElse(null);
+    // Updated to return Optional<EventEntity>
+    public Optional<EventEntity> getEventById(int id) {
+        return eventRepository.findById(id);
     }
 
     public EventEntity createEvent(EventEntity event) {
@@ -26,7 +28,7 @@ public class EventService {
     }
 
     public EventEntity updateEvent(int id, EventEntity event) {
-        //event.setEventId(id); // Ensure the ID is set correctly for updates
+        // Ensure the ID is set correctly for updates if needed
         return eventRepository.save(event);
     }
 

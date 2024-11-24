@@ -24,8 +24,9 @@ public class EventController {
 
     @GetMapping("/{id}")
     public ResponseEntity<EventEntity> getEventById(@PathVariable int id) {
-        EventEntity event = eventService.getEventById(id);
-        return event != null ? ResponseEntity.ok(event) : ResponseEntity.notFound().build();
+        return eventService.getEventById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
