@@ -1,13 +1,16 @@
 package com.g4appdev.eventmanagement.service;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.g4appdev.eventmanagement.dto.EventRegistrationDTO;
+import com.g4appdev.eventmanagement.dto.NotificationDTO;
 import com.g4appdev.eventmanagement.entity.EventEntity;
 import com.g4appdev.eventmanagement.entity.EventRegistrationEntity;
 import com.g4appdev.eventmanagement.entity.UserEntity;
@@ -96,4 +99,27 @@ public class EventRegistrationService {
         }
         return eventRegistrationRepository.findByUserAndEvent(user, event);
     }
+    
+    /**
+     * Fetch notifications for events happening within the next 2 days.
+     *
+     * @return List of NotificationDTO for upcoming events.
+     */
+    public List<NotificationDTO> getUpcomingEventNotifications(LocalDate startDate, LocalDate endDate) {
+        // Fetch all unique events happening within the specified date range
+        List<EventEntity> upcomingEvents = eventRepository.findEventsWithinDateRange(startDate, endDate);
+
+        // Map the events to NotificationDTOs
+        return upcomingEvents.stream()
+                .map(event -> new NotificationDTO(
+                        event.getevent_name(),  // Event name
+                        event.getDate(),        // Event date
+                        event.getTime(),        // Event time
+                        event.getLocation(),    // Event location
+                        null                    // No specific email, since it's not user-specific
+                ))
+                .distinct() // Ensure distinct events
+                .collect(Collectors.toList());
+    }
+
 }

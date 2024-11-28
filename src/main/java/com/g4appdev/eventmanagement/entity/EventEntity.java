@@ -9,13 +9,25 @@ public class EventEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "event_id")
     private int event_id;
-
+    
+    @Column(name = "event_name")
     private String event_name;
+    
+    @Column(name = "event_type")
     private String event_type;
+    
+    @Column(name = "date")
     private LocalDate date;
+    
+    @Column(name = "time")
     private LocalTime time;
+    
+    @Column(name = "location")
     private String location;
+    
+    @Column(name = "description")
     private String description;
 
     // Constructors

@@ -1,5 +1,6 @@
 package com.g4appdev.eventmanagement.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.g4appdev.eventmanagement.dto.EventRegistrationDTO;
+import com.g4appdev.eventmanagement.dto.NotificationDTO;
 import com.g4appdev.eventmanagement.entity.EventEntity;
 import com.g4appdev.eventmanagement.entity.EventRegistrationEntity;
 import com.g4appdev.eventmanagement.entity.UserEntity;
@@ -116,4 +118,25 @@ public class EventRegistrationController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+    
+ // Controller to fetch event notifications happening in the next two days
+    @GetMapping("notifications/upcoming")
+    public ResponseEntity<List<NotificationDTO>> getUpcomingEventNotifications() {
+        try {
+            // Set the date range for today and two days later
+            LocalDate today = LocalDate.now();
+            LocalDate twoDaysLater = today.plusDays(2);
+
+            // Fetch notifications for events within this range
+            List<NotificationDTO> notifications = eventRegistrationService.getUpcomingEventNotifications(today, twoDaysLater);
+
+            // Return the list of notifications with HTTP 200
+            return ResponseEntity.ok(notifications);
+        } catch (Exception e) {
+            // Log the error and return HTTP 500 for any unexpected exceptions
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
 }
