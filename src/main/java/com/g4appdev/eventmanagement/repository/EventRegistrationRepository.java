@@ -32,5 +32,12 @@ public interface EventRegistrationRepository extends JpaRepository<EventRegistra
     List<EventRegistrationEntity> findUpcomingEvents(
         @Param("startDate") LocalDate startDate, 
         @Param("endDate") LocalDate endDate);
+    
+ // Derived query using Spring Data JPA
+    boolean existsByUser_UserIDAndEvent_EventID(int userID, int eventID);
+
+    // Alternatively, a custom JPQL query
+    @Query("SELECT CASE WHEN COUNT(er) > 0 THEN TRUE ELSE FALSE END FROM EventRegistrationEntity er WHERE er.user.userID = :userID AND er.event.eventID = :eventID")
+    boolean isUserRegisteredForEvent(@Param("userID") int userID, @Param("eventID") int eventID);
 
  }

@@ -48,4 +48,17 @@ public class EventController {
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
     }
+    
+    @GetMapping("/search")
+    public ResponseEntity<List<EventEntity>> searchEvents(
+            @RequestParam(required = false) String eventType,
+            @RequestParam(required = false) String location) {
+        List<EventEntity> events = eventService.findByEventTypeAndLocation(eventType, location);
+        if (events.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(events);
+    }
+    
+
 }

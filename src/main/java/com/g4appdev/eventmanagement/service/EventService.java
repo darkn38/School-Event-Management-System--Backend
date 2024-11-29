@@ -35,4 +35,9 @@ public class EventService {
     public void deleteEvent(int id) {
         eventRepository.deleteById(id);
     }
+    
+    public List<EventEntity> findByEventTypeAndLocation(String eventType, String location) {
+        return eventRepository.findByEventTypeAndLocation(eventType, location);
+    }
+    
 }

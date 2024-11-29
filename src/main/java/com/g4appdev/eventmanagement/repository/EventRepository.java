@@ -15,5 +15,7 @@ import org.springframework.stereotype.Repository;
 public interface EventRepository extends JpaRepository<EventEntity, Integer> {
 	@Query("SELECT e FROM EventEntity e WHERE e.date BETWEEN :startDate AND :endDate ORDER BY e.date ASC")
 	List<EventEntity> findEventsWithinDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+	
+	List<EventEntity> findByEventTypeAndLocation(String eventType, String location);
 
 }

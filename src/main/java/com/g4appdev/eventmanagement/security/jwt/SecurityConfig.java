@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/users/register").permitAll() // Allow public access to login/register
                 .requestMatchers(HttpMethod.GET, "/events").permitAll() // Allow public access to view events
                 .requestMatchers(HttpMethod.POST, "/eventRegistrations").authenticated() // Require authentication for registering for events
+                .requestMatchers(HttpMethod.POST, "/api/eventregistrations/register").authenticated() // Secure the correct endpoint
                 .requestMatchers(HttpMethod.GET, "/api/eventregistrations/notifications/upcoming").authenticated() // Require authentication
                 .anyRequest().authenticated() // Require authentication for all other requests
             )

@@ -10,13 +10,13 @@ public class EventEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "event_id")
-    private int event_id;
+    private int eventID;
     
     @Column(name = "event_name")
     private String event_name;
     
     @Column(name = "event_type")
-    private String event_type;
+    private String eventType;
     
     @Column(name = "date")
     private LocalDate date;
@@ -38,7 +38,7 @@ public class EventEntity {
 
     public EventEntity(String event_name, String event_type, LocalDate date, LocalTime time, String location, String description) {
         this.event_name = event_name;
-        this.event_type = event_type;
+        this.eventType = event_type;
         this.date = date;
         this.time = time;
         this.location = location;
@@ -48,11 +48,11 @@ public class EventEntity {
     // Getters and Setters
 
     public int getevent_id() {
-        return event_id;
+        return eventID;
     }
 
     public void setevent_id(int event_id) {
-        this.event_id = event_id;
+        this.eventID = event_id;
     }
 
     public String getevent_name() {
@@ -64,11 +64,11 @@ public class EventEntity {
     }
 
     public String getevent_type() {
-        return event_type;
+        return eventType;
     }
 
     public void setevent_type(String event_type) {
-        this.event_type = event_type;
+        this.eventType = event_type;
     }
 
     public LocalDate getDate() {

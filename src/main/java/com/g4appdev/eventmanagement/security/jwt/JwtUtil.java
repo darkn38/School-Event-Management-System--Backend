@@ -69,10 +69,11 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserDetails userDetails, int userID) {
         try {
             Map<String, Object> claims = new HashMap<>();
             claims.put("authorities", userDetails.getAuthorities());
+            claims.put("userID", userID); // Add userID as a claim
             String token = createToken(claims, userDetails.getUsername(), ACCESS_TOKEN_VALIDITY);
             System.out.println("Generated JWT Token: " + token); // Log the generated token
             return token;

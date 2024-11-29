@@ -37,7 +37,7 @@ public class AuthController {
 
             // Load user details and generate JWT token
             UserDetails userDetails = userService.loadUserByUsername(userEntity.getEmailAddress());
-            String token = jwtUtil.generateToken(userDetails);
+            String token = jwtUtil.generateToken(userDetails, user.get().getUserID());
             System.out.println("Generated Token in AuthController: " + token);
 
             if (token == null || token.isEmpty()) {

@@ -2,6 +2,7 @@ package com.g4appdev.eventmanagement.controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.g4appdev.eventmanagement.dto.EventRegistrationDTO;
@@ -138,5 +140,28 @@ public class EventRegistrationController {
             return ResponseEntity.status(500).body(null);
         }
     }
+    
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUserForEvent(@RequestBody Map<String, Integer> requestBody) {
+        try {
+            int userID = requestBody.get("userID");
+            int eventID = requestBody.get("eventID");
+
+            // Check if the user is already registered for the event
+            boolean alreadyRegistered = eventRegistrationService.isAlreadyRegistered(userID, eventID);
+            if (alreadyRegistered) {
+                return ResponseEntity.badRequest().body("User is already registered for this event.");
+            }
+
+            // Perform the registration logic
+            eventRegistrationService.registerUserForEvent(userID, eventID);
+
+            return ResponseEntity.ok("Registration successful!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("An error occurred during registration.");
+        }
+    }
+
 
 }

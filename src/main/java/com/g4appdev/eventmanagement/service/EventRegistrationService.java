@@ -121,5 +121,24 @@ public class EventRegistrationService {
                 .distinct() // Ensure distinct events
                 .collect(Collectors.toList());
     }
+    
+    public boolean isAlreadyRegistered(int userID, int eventID) {
+        return eventRegistrationRepository.existsByUser_UserIDAndEvent_EventID(userID, eventID);
+    }
 
+    public void registerUserForEvent(int userID, int eventID) {
+        UserEntity user = userRepository.findById(userID)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        EventEntity event = eventRepository.findById(eventID)
+                .orElseThrow(() -> new IllegalArgumentException("Event not found"));
+
+        EventRegistrationEntity registration = new EventRegistrationEntity();
+        registration.setUser(user);
+        registration.setEvent(event);
+        registration.setRegistrationDate(new Date());
+        registration.setTicketType("Standard"); // Or fetch this dynamically
+        registration.setPaymentStatus("Paid"); // Adjust based on your logic
+
+        eventRegistrationRepository.save(registration);
+    }
 }
