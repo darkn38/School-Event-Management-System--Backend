@@ -17,5 +17,8 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
 	List<EventEntity> findEventsWithinDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 	
 	List<EventEntity> findByEventTypeAndLocation(String eventType, String location);
+	
+	@Query("SELECT e FROM EventEntity e WHERE e.date >= :currentDate ORDER BY e.date ASC")
+    List<EventEntity> findUpcomingEvents(LocalDate currentDate);
 
 }

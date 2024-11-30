@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -60,5 +61,13 @@ public class EventController {
         return ResponseEntity.ok(events);
     }
     
+    @GetMapping("/upcoming")
+    public ResponseEntity<List<EventEntity>> getUpcomingEvents() {
+        List<EventEntity> upcomingEvents = eventService.findUpcomingEvents(LocalDate.now());
+        if (upcomingEvents.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(upcomingEvents);
+    }
 
 }

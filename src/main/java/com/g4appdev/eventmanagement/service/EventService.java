@@ -5,6 +5,7 @@ import com.g4appdev.eventmanagement.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +39,10 @@ public class EventService {
     
     public List<EventEntity> findByEventTypeAndLocation(String eventType, String location) {
         return eventRepository.findByEventTypeAndLocation(eventType, location);
+    }
+    
+    public List<EventEntity> findUpcomingEvents(LocalDate currentDate) {
+        return eventRepository.findUpcomingEvents(currentDate);
     }
     
 }

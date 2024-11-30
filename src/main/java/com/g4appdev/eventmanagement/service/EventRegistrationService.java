@@ -18,6 +18,8 @@ import com.g4appdev.eventmanagement.repository.EventRegistrationRepository;
 import com.g4appdev.eventmanagement.repository.EventRepository;
 import com.g4appdev.eventmanagement.repository.UserRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class EventRegistrationService {
 
@@ -29,6 +31,14 @@ public class EventRegistrationService {
 
     @Autowired
     private EventRepository eventRepository;
+    
+
+    @Autowired
+    private UserService userService; // Inject UserService
+
+    @Autowired
+    private EventService eventService; // Inject EventService
+
 
     // EventRegistrationService - Save or Update Event Registration
     public EventRegistrationEntity saveEventRegistration(EventRegistrationDTO registrationDTO) {
@@ -141,4 +151,29 @@ public class EventRegistrationService {
 
         eventRegistrationRepository.save(registration);
     }
+    
+    @Transactional
+    public EventRegistrationEntity updateEventRegistration(int id, EventRegistrationDTO registrationDTO) {
+        // Fetch the existing registration
+        EventRegistrationEntity existingRegistration = eventRegistrationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Registration not found"));
+
+        // Fetch the user by email address
+        UserEntity user = userService.getUserByEmail(registrationDTO.getEmailAddress())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Fetch the event by event ID
+        EventEntity event = eventService.getEventById(registrationDTO.getEventId())
+                .orElseThrow(() -> new IllegalArgumentException("Event not found"));
+
+        // Update necessary fields
+        existingRegistration.setUser(user); // Link the user
+        existingRegistration.setEvent(event); // Link the event
+        existingRegistration.setPaymentStatus(registrationDTO.getPaymentStatus());
+        existingRegistration.setTicketType(registrationDTO.getTicketType());
+
+        // Save and return the updated registration
+        return eventRegistrationRepository.save(existingRegistration);
+    }
+
 }

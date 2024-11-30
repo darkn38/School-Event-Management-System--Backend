@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.g4appdev.eventmanagement.dto.EventRegistrationDTO;
@@ -162,6 +162,29 @@ public class EventRegistrationController {
             return ResponseEntity.status(500).body("An error occurred during registration.");
         }
     }
+    
+ // Update EventRegistration
+    @PutMapping("/{id}")
+    public ResponseEntity<EventRegistrationEntity> updateEventRegistration(
+            @PathVariable int id,
+            @RequestBody EventRegistrationDTO registrationDTO) {
+        try {
+            // Check if the registration exists
+            Optional<EventRegistrationEntity> existingRegistration = eventRegistrationService.getEventRegistrationById(id);
+            if (existingRegistration.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Update the existing registration with new values
+            EventRegistrationEntity updatedRegistration = eventRegistrationService.updateEventRegistration(id, registrationDTO);
+
+            return ResponseEntity.ok(updatedRegistration);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
 
 
 }
