@@ -32,50 +32,57 @@ public class EventRegistrationService {
     @Autowired
     private EventRepository eventRepository;
     
+    @Autowired
+    private UserService userService;
 
     @Autowired
-    private UserService userService; // Inject UserService
+    private EventService eventService;
 
-    @Autowired
-    private EventService eventService; // Inject EventService
-
-
-    // EventRegistrationService - Save or Update Event Registration
     public EventRegistrationEntity saveEventRegistration(EventRegistrationDTO registrationDTO) {
         EventRegistrationEntity registration = new EventRegistrationEntity();
         registration.setTicketType(registrationDTO.getTicketType());
         registration.setPaymentStatus(registrationDTO.getPaymentStatus());
-        registration.setRegistrationDate(new Date()); // Set the registration date to the current date
+        registration.setRegistrationDate(new Date());
 
-        // Fetch and set the UserEntity by email address
-        Optional<UserEntity> userOptional = userRepository.findByEmailAddress(registrationDTO.getEmailAddress());
-        if (userOptional.isEmpty()) {
-            throw new IllegalArgumentException("User not found with email: " + registrationDTO.getEmailAddress());
+        // Fetch and set the UserEntity
+        UserEntity user = userRepository.findByEmailAddress(registrationDTO.getEmailAddress())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + registrationDTO.getEmailAddress()));
+        registration.setUser(user);
+
+        // Fetch and validate the EventEntity
+        EventEntity event = eventRepository.findById(registrationDTO.getEventId())
+                .orElseThrow(() -> new IllegalArgumentException("Event not found with ID: " + registrationDTO.getEventId()));
+
+        // Ensure the event is approved before allowing registration
+        if (!"APPROVED".equals(event.getApprovalStatus())) {
+            throw new IllegalArgumentException("Cannot register for unapproved event: " + event.getEventName());
         }
-        registration.setUser(userOptional.get());
+        registration.setEvent(event);
 
-        // Fetch and set the EventEntity by event ID
-        Optional<EventEntity> eventOptional = eventRepository.findById(registrationDTO.getEventId());
-        if (eventOptional.isEmpty()) {
-            throw new IllegalArgumentException("Event not found with ID: " + registrationDTO.getEventId());
-        }
-        registration.setEvent(eventOptional.get());
-
-        // Save the registration entity
         return eventRegistrationRepository.save(registration);
     }
 
-    // Get an EventRegistration by registration ID
     public Optional<EventRegistrationEntity> getEventRegistrationById(int registrationID) {
         return eventRegistrationRepository.findById(registrationID);
     }
 
-    // Get all Event Registrations
-    public List<EventRegistrationEntity> getAllRegistrations() {
-        return eventRegistrationRepository.findAll();
+    public List<EventRegistrationDTO> getAllRegistrations() {
+        return eventRegistrationRepository.findAll().stream()
+            .map(registration -> new EventRegistrationDTO(
+            	registration.getRegistrationID(), 
+                registration.getUser().getFirstName(),       // User first name
+                registration.getUser().getLastName(),        // User last name
+                registration.getUser().getEmailAddress(),    // User email
+                registration.getTicketType(),                // Ticket type
+                registration.getPaymentStatus(),             // Payment status
+                registration.getEvent().getEventID(),        // Event ID
+                registration.getEvent().getEventName(),      // Event name
+                registration.getEvent().getEventType(),       // Event type
+                registration.getRegistrationDate()
+            ))
+            .collect(Collectors.toList());
     }
 
-    // Delete an EventRegistration by ID
     public void deleteEventRegistrationById(int id) {
         if (!eventRegistrationRepository.existsById(id)) {
             throw new RuntimeException("Event Registration not found with ID: " + id);
@@ -83,7 +90,6 @@ public class EventRegistrationService {
         eventRegistrationRepository.deleteById(id);
     }
 
-    // Get registrations by User
     public List<EventRegistrationEntity> getRegistrationsByUser(UserEntity user) {
         if (!userRepository.existsById(user.getUserID())) {
             throw new RuntimeException("User not found with ID: " + user.getUserID());
@@ -91,47 +97,39 @@ public class EventRegistrationService {
         return eventRegistrationRepository.findByUser(user);
     }
 
-    // Get registrations by Event
     public List<EventRegistrationEntity> getRegistrationsByEvent(EventEntity event) {
-        if (!eventRepository.existsById(event.getevent_id())) {
-            throw new RuntimeException("Event not found with ID: " + event.getevent_id());
+        if (!eventRepository.existsById(event.getEventID())) {
+            throw new RuntimeException("Event not found with ID: " + event.getEventID());
         }
         return eventRegistrationRepository.findByEvent(event);
     }
 
-    // Get registrations by User and Event
     public List<EventRegistrationEntity> getRegistrationsByUserAndEvent(UserEntity user, EventEntity event) {
         if (!userRepository.existsById(user.getUserID())) {
             throw new RuntimeException("User not found with ID: " + user.getUserID());
         }
-        if (!eventRepository.existsById(event.getevent_id())) {
-            throw new RuntimeException("Event not found with ID: " + event.getevent_id());
+        if (!eventRepository.existsById(event.getEventID())) {
+            throw new RuntimeException("Event not found with ID: " + event.getEventID());
         }
         return eventRegistrationRepository.findByUserAndEvent(user, event);
     }
-    
-    /**
-     * Fetch notifications for events happening within the next 2 days.
-     *
-     * @return List of NotificationDTO for upcoming events.
-     */
+
     public List<NotificationDTO> getUpcomingEventNotifications(LocalDate startDate, LocalDate endDate) {
-        // Fetch all unique events happening within the specified date range
         List<EventEntity> upcomingEvents = eventRepository.findEventsWithinDateRange(startDate, endDate);
 
-        // Map the events to NotificationDTOs
         return upcomingEvents.stream()
+                .filter(event -> "APPROVED".equals(event.getApprovalStatus())) // Only notify about approved events
                 .map(event -> new NotificationDTO(
-                        event.getevent_name(),  // Event name
-                        event.getDate(),        // Event date
-                        event.getTime(),        // Event time
-                        event.getLocation(),    // Event location
-                        null                    // No specific email, since it's not user-specific
+                        event.getEventName(),
+                        event.getDate(),
+                        event.getTime(),
+                        event.getLocation(),
+                        null
                 ))
-                .distinct() // Ensure distinct events
+                .distinct()
                 .collect(Collectors.toList());
     }
-    
+
     public boolean isAlreadyRegistered(int userID, int eventID) {
         return eventRegistrationRepository.existsByUser_UserIDAndEvent_EventID(userID, eventID);
     }
@@ -142,38 +140,45 @@ public class EventRegistrationService {
         EventEntity event = eventRepository.findById(eventID)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found"));
 
+        if (!"APPROVED".equals(event.getApprovalStatus())) {
+            throw new IllegalArgumentException("Cannot register for unapproved event.");
+        }
+
         EventRegistrationEntity registration = new EventRegistrationEntity();
         registration.setUser(user);
         registration.setEvent(event);
         registration.setRegistrationDate(new Date());
-        registration.setTicketType("Standard"); // Or fetch this dynamically
-        registration.setPaymentStatus("Paid"); // Adjust based on your logic
+        registration.setTicketType("Standard");
+        registration.setPaymentStatus("Paid");
 
         eventRegistrationRepository.save(registration);
     }
-    
+
     @Transactional
     public EventRegistrationEntity updateEventRegistration(int id, EventRegistrationDTO registrationDTO) {
-        // Fetch the existing registration
         EventRegistrationEntity existingRegistration = eventRegistrationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Registration not found"));
 
-        // Fetch the user by email address
         UserEntity user = userService.getUserByEmail(registrationDTO.getEmailAddress())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // Fetch the event by event ID
         EventEntity event = eventService.getEventById(registrationDTO.getEventId())
                 .orElseThrow(() -> new IllegalArgumentException("Event not found"));
 
-        // Update necessary fields
-        existingRegistration.setUser(user); // Link the user
-        existingRegistration.setEvent(event); // Link the event
+        if (!"APPROVED".equals(event.getApprovalStatus())) {
+            throw new IllegalArgumentException("Cannot update registration for unapproved event.");
+        }
+
+        existingRegistration.setUser(user);
+        existingRegistration.setEvent(event);
         existingRegistration.setPaymentStatus(registrationDTO.getPaymentStatus());
         existingRegistration.setTicketType(registrationDTO.getTicketType());
 
-        // Save and return the updated registration
         return eventRegistrationRepository.save(existingRegistration);
+    }
+    
+    public boolean doesRegistrationExist(int id) {
+        return eventRegistrationRepository.existsById(id);
     }
 
 }

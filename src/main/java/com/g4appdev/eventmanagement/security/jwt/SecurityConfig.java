@@ -45,6 +45,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/eventRegistrations").authenticated() // Require authentication for registering for events
                 .requestMatchers(HttpMethod.POST, "/api/eventregistrations/register").authenticated() // Secure the correct endpoint
                 .requestMatchers(HttpMethod.GET, "/api/eventregistrations/notifications/upcoming").authenticated() // Require authentication
+                .requestMatchers(HttpMethod.GET, "/api/users/profile").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/users/profile").authenticated()
                 .anyRequest().authenticated() // Require authentication for all other requests
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter before username/password filter

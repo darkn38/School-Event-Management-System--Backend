@@ -74,4 +74,18 @@ public class JwtFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
+    /**
+     * Utility method to retrieve the currently authenticated user's email or username
+     * from the SecurityContext.
+     * 
+     * @return the authenticated user's email or null if not authenticated.
+     */
+    public static String getAuthenticatedUserEmail() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof UserDetails) {
+            return ((UserDetails) authentication.getPrincipal()).getUsername();
+        }
+        return null;
+    }
 }

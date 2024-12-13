@@ -1,4 +1,5 @@
 package com.g4appdev.eventmanagement.entity;
+
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -11,64 +12,70 @@ public class EventEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "event_id")
     private int eventID;
-    
+
     @Column(name = "event_name")
-    private String event_name;
-    
+    private String eventName;
+
     @Column(name = "event_type")
     private String eventType;
-    
+
     @Column(name = "date")
     private LocalDate date;
-    
+
     @Column(name = "time")
     private LocalTime time;
-    
+
     @Column(name = "location")
     private String location;
-    
+
     @Column(name = "description")
     private String description;
 
-    // Constructors
+    @Column(name = "approval_status")
+    private String approvalStatus; // ENUM in database, mapped as String
 
+    @Column(name = "created_by")
+    private String createdBy;
+
+    // Constructors
     public EventEntity() {
         // Default constructor
     }
 
-    public EventEntity(String event_name, String event_type, LocalDate date, LocalTime time, String location, String description) {
-        this.event_name = event_name;
-        this.eventType = event_type;
+    public EventEntity(String eventName, String eventType, LocalDate date, LocalTime time, String location, String description, String approvalStatus, String createdBy) {
+        this.eventName = eventName;
+        this.eventType = eventType;
         this.date = date;
         this.time = time;
         this.location = location;
         this.description = description;
+        this.approvalStatus = approvalStatus;
+        this.createdBy = createdBy;
     }
 
     // Getters and Setters
-
-    public int getevent_id() {
+    public int getEventID() {
         return eventID;
     }
 
-    public void setevent_id(int event_id) {
-        this.eventID = event_id;
+    public void setEventID(int eventID) {
+        this.eventID = eventID;
     }
 
-    public String getevent_name() {
-        return event_name;
+    public String getEventName() {
+        return eventName;
     }
 
-    public void setevent_name(String event_name) {
-        this.event_name = event_name;
+    public void setEventName(String eventName) {
+        this.eventName = eventName;
     }
 
-    public String getevent_type() {
+    public String getEventType() {
         return eventType;
     }
 
-    public void setevent_type(String event_type) {
-        this.eventType = event_type;
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
     }
 
     public LocalDate getDate() {
@@ -101,5 +108,21 @@ public class EventEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getApprovalStatus() {
+        return approvalStatus;
+    }
+
+    public void setApprovalStatus(String approvalStatus) {
+        this.approvalStatus = approvalStatus;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 }

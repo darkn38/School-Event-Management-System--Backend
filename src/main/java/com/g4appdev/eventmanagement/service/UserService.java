@@ -46,6 +46,11 @@ public class UserService implements UserDetailsService {
         return userRepository.save(userEntity);
     }
 
+    // Save or update a user
+    public UserEntity saveUser(UserEntity userEntity) {
+        return userRepository.save(userEntity);
+    }
+
     // Update an existing user with hashed password if updated
     public UserEntity updateUser(int userID, UserEntity userEntity) {
         Optional<UserEntity> existingUser = userRepository.findById(userID);
@@ -125,11 +130,13 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    // Encode password (utility function)
+    public String encodePassword(String password) {
+        return passwordEncoder.encode(password);
+    }
+
     // Check if a user exists by email
     public Optional<UserEntity> getUserByEmail(String emailAddress) {
         return userRepository.findByEmailAddress(emailAddress);
     }
-    
-    
-    
 }

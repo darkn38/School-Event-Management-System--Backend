@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -60,10 +61,11 @@ public class EventRegistrationController {
 
     // Get All Event Registrations
     @GetMapping
-    public ResponseEntity<List<EventRegistrationEntity>> getAllRegistrations() {
-        List<EventRegistrationEntity> registrations = eventRegistrationService.getAllRegistrations();
+    public ResponseEntity<List<EventRegistrationDTO>> getAllRegistrations() {
+        List<EventRegistrationDTO> registrations = eventRegistrationService.getAllRegistrations();
         return ResponseEntity.ok(registrations);
     }
+
 
     // Get EventRegistration by ID
     @GetMapping("/{id}")
@@ -77,12 +79,24 @@ public class EventRegistrationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteEventRegistrationById(@PathVariable int id) {
         try {
+            // Check if the registration exists
+            if (!eventRegistrationService.doesRegistrationExist(id)) {
+                System.out.println("Event registration not found with ID: " + id);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Event registration with ID " + id + " does not exist.");
+            }
+
+            // Proceed with deletion
             eventRegistrationService.deleteEventRegistrationById(id);
-            return ResponseEntity.ok("Event registration with ID " + id + " has been deleted.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok("Event registration with ID " + id + " has been successfully deleted.");
+        } catch (Exception e) {
+            // Log the exception
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while deleting the event registration.");
         }
     }
+
 
     // Get Registrations by User
     @GetMapping("/user/{userId}")
@@ -168,23 +182,21 @@ public class EventRegistrationController {
     public ResponseEntity<EventRegistrationEntity> updateEventRegistration(
             @PathVariable int id,
             @RequestBody EventRegistrationDTO registrationDTO) {
+        if (id <= 0) {
+            return ResponseEntity.badRequest().body(null); // Return 400 if ID is invalid
+        }
         try {
-            // Check if the registration exists
             Optional<EventRegistrationEntity> existingRegistration = eventRegistrationService.getEventRegistrationById(id);
             if (existingRegistration.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-
-            // Update the existing registration with new values
             EventRegistrationEntity updatedRegistration = eventRegistrationService.updateEventRegistration(id, registrationDTO);
-
             return ResponseEntity.ok(updatedRegistration);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(null);
         }
     }
-
 
 
 }
